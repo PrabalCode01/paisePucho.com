@@ -14,9 +14,7 @@ export const metadata: Metadata = {
   description: "Track product prices effortlessly and save money on your online shopping",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+export default function RootLayout({children}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
