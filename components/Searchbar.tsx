@@ -1,15 +1,17 @@
 "use client"
 import { scrapeAndStoreProduct } from '@/lib/actions';
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState } from 'react';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const isValidAmazonProductURL = (url: string) => {
   try {
     const parsedURL = new URL(url);
     const hostname = parsedURL.hostname;
 
-    if(
-      hostname.includes('amazon.com') || 
-      hostname.includes ('amazon.') || 
+    if (
+      hostname.includes('amazon.com') ||
+      hostname.includes('amazon.') ||
       hostname.endsWith('amazon')
     ) {
       return true;
@@ -19,7 +21,7 @@ const isValidAmazonProductURL = (url: string) => {
   }
 
   return false;
-}
+};
 
 const Searchbar = () => {
   const [searchPrompt, setSearchPrompt] = useState('');
@@ -30,42 +32,54 @@ const Searchbar = () => {
 
     const isValidLink = isValidAmazonProductURL(searchPrompt);
 
-    if(!isValidLink) return alert('Please provide a valid Amazon link')
-      try {
-    setIsLoading(true);
+    if (!isValidLink) return alert('Please provide a valid Amazon link');
     
-    // Scrape the product page
-    const product = await scrapeAndStoreProduct(searchPrompt);
-  } catch (error) {
-    console.log(error);
-  } finally {
-    setIsLoading(false);
-  }
- 
-  }
+    try {
+      setIsLoading(true);
+
+      // Scrape the product page
+      const product = await scrapeAndStoreProduct(searchPrompt);
+
+      // Show success notification
+      toast.success('Product successfully added!');
+      
+      // Clear the search bar
+      setSearchPrompt('');
+    } catch (error) {
+      console.log(error);
+      toast.error('An error occurred while adding the product.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <form 
-      className="flex flex-wrap gap-4 mt-12" 
-      onSubmit={handleSubmit}
-    >
-      <input 
-        type="text"
-        value={searchPrompt}
-        onChange={(e) => setSearchPrompt(e.target.value)}
-        placeholder="Enter product link"
-        className="searchbar-input"
-      />
-
-      <button 
-        type="submit" 
-        className="searchbar-btn"
-        disabled={searchPrompt === ''}
+    <>
+      <form
+        className="flex flex-wrap gap-4 mt-12"
+        onSubmit={handleSubmit}
       >
-        {isLoading ? 'Searching...' : 'Search'}
-      </button>
-    </form>
-  )
-}
+        <input
+          type="text"
+          value={searchPrompt}
+          onChange={(e) => setSearchPrompt(e.target.value)}
+          placeholder="Enter product link"
+          className="searchbar-input"
+        />
 
-export default Searchbar
+        <button
+          type="submit"
+          className="searchbar-btn"
+          disabled={searchPrompt === ''}
+        >
+          {isLoading ? 'Searching...' : 'Search'}
+        </button>
+      </form>
+      
+      {/* ToastContainer is necessary for displaying toast notifications */}
+      <ToastContainer />
+    </>
+  );
+};
+
+export default Searchbar;
